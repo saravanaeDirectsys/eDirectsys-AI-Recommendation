@@ -1,0 +1,651 @@
+<!-- {% load static %}
+{% include 'navbar.html' %}
+
+<h1>🎯 AI Recommendations</h1>
+
+<form method="get">
+    <label>Number of Top Campaigns:</label>
+    <input type="number" name="top_n_campaigns" value="{{ filters.top_n_campaigns }}" min="1" max="50"><br><br>
+
+    <label>Top Files per Campaign:</label>
+    <input type="number" name="top_n_files" value="{{ filters.top_n_files }}" min="1" max="50"><br><br>
+
+    <label>Exclude Last X Days:</label>
+    <input type="number" name="exclude_days" value="{{ filters.exclude_days }}" min="0" max="60"><br><br>
+
+    <label>Select Campaigns:</label><br>
+    <select name="campaign" multiple>
+        {% for c in campaign_options %}
+            <option value="{{ c }}" {% if c in filters.selected_campaigns %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Select ISPs:</label><br>
+    <select name="isp" multiple>
+        {% for isp in isp_options %}
+            <option value="{{ isp }}" {% if isp in filters.selected_isp %}selected{% endif %}>{{ isp }}</option>
+        {% endfor %}
+    </select><br><br>
+
+    <button type="submit">Generate Recommendations</button>
+</form>
+
+<hr>
+
+
+<h2>📊 Top Data Files per Campaign</h2>
+{% if top_files %}
+    {% for f in top_files %}
+        <p>{{ f.campaign_name }} — {{ f.matched_datafile }} (CPM: {{ f.cpm|floatformat:2 }}, Last Send: {{ f.last_send_date|default:"N/A" }})</p>
+    {% endfor %}
+{% else %}
+    <p>No data files found for the selected filters.</p>
+{% endif %} -->
+
+
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistance - eDirectSys</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafb;
+            color: #2d3748;
+            margin-left: 260px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 20px 40px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #2d3748;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            color: #667eea;
+        }
+
+        .top-bar-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #1a202c;
+            letter-spacing: -0.5px;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 0 20px;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        .user-info-text {
+            text-align: right;
+        }
+
+        .user-greeting {
+            font-size: 0.9em;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .user-name {
+            font-size: 0.95em;
+            color: #1a202c;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+        }
+
+        /* Page Content */
+        .page-content {
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 32px;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+        }
+
+        .breadcrumb span {
+            color: #cbd5e0;
+        }
+
+        /* Form Section */
+        .form-section {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 32px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-description {
+            color: #718096;
+            font-size: 0.95em;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            background: #f8fafb;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-hint {
+            font-size: 0.85em;
+            color: #a0aec0;
+            margin-top: 6px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Results Section */
+        .results-section {
+            margin-top: 40px;
+        }
+
+        .results-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .campaign-card {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .campaign-card:hover {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+            border-color: #cbd5e0;
+            transform: translateY(-4px);
+        }
+
+        .campaign-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 20px;
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+
+        .file-list {
+            padding: 20px;
+        }
+
+        .file-item {
+            padding: 14px 0;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #2d3748;
+            word-break: break-word;
+        }
+
+        .file-metrics {
+            font-size: 0.85em;
+            color: #718096;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .empty-icon {
+            font-size: 3em;
+            margin-bottom: 16px;
+        }
+
+        .empty-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: #718096;
+        }
+
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #718096;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .page-content {
+                padding: 30px;
+            }
+
+            .form-section {
+                padding: 24px;
+            }
+
+            .results-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .page-content {
+                padding: 20px;
+            }
+
+            .user-info-text {
+                display: none;
+            }
+
+            .top-bar-right {
+                gap: 15px;
+            }
+
+            .form-section {
+                padding: 20px;
+                margin-bottom: 24px;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                padding: 16px 20px;
+            }
+
+            .top-bar-title {
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-content {
+                padding: 16px;
+            }
+
+            .form-section {
+                padding: 16px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .top-bar-right {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .user-section {
+                padding: 0;
+                border-left: none;
+            }
+
+            .form-title {
+                font-size: 1.1em;
+            }
+
+            .results-title {
+                font-size: 1.1em;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+        }
+
+        /* Scrollbar */
+        .page-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .page-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .page-content::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .page-content::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+
+{% include 'navbar.html' %}
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <div class="top-bar-left">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="top-bar-title">AI Assistance</h1>
+    </div>
+    <div class="top-bar-right">
+        <div class="user-section">
+            <div class="user-info-text">
+                <div class="user-greeting">Welcome back</div>
+                <div class="user-name">{{ user.username|default:"User Account" }}</div>
+            </div>
+            <div class="user-avatar">{{ user.username|first|upper|default:"U" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Page Content -->
+<div class="page-content">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>/</span>
+        <span>AI Assistance</span>
+    </div>
+
+    <!-- Form Section -->
+    <div class="form-section">
+        <div class="form-title">
+            <i class="fas fa-magic"></i>
+            Generate Recommendations
+        </div>
+        <p class="form-description">Get AI-powered insights to optimize your data files and campaigns</p>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="campaign_name">Campaign Name</label>
+                <input type="text" id="campaign_name" name="campaign_name" placeholder="Enter campaign name (optional)" />
+                <p class="form-hint">Leave blank to analyze all campaigns</p>
+            </div>
+
+            <div class="form-group">
+                <label for="min_engagement">Minimum Engagement Rate (%)</label>
+                <input type="number" id="min_engagement" name="min_engagement" placeholder="e.g., 5" min="0" step="0.1" />
+                <p class="form-hint">Filter by minimum engagement threshold</p>
+            </div>
+
+            <div class="form-group">
+                <label for="sort_by">Sort Results By</label>
+                <select id="sort_by" name="sort_by">
+                    <option value="revenue">Revenue (Highest)</option>
+                    <option value="engagement">Engagement Rate</option>
+                    <option value="recent">Most Recent</option>
+                    <option value="performance">Best Performance</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="limit">Number of Results</label>
+                <input type="number" id="limit" name="limit" placeholder="e.g., 10" min="1" value="10" />
+                <p class="form-hint">Maximum number of recommendations to display</p>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Additional Notes</label>
+                <textarea id="notes" name="notes" placeholder="Any specific criteria or notes..."></textarea>
+            </div>
+
+            <div class="form-footer">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Generate Recommendations
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Results Section -->
+    {% if top_files %}
+        <div class="results-section">
+            <div class="results-title">
+                <i class="fas fa-chart-bar"></i>
+                Top Data Files per Campaign
+            </div>
+
+            <div class="results-grid">
+                {% for group in grouped_files %}
+                    <div class="campaign-card">
+                        <div class="campaign-title">{{ group.campaign_name }}</div>
+                        <div class="file-list">
+                            {% for f in group.files %}
+                                <div class="file-item">
+                                    <span class="file-name">{{ f.matched_datafile }}</span>
+                                    <span class="file-metrics">
+                                        <i class="fas fa-dollar-sign"></i> CPM: ${{ f.cpm|floatformat:2 }} | 
+                                        <i class="fas fa-calendar"></i> {{ f.last_send_date|default:"N/A" }}
+                                    </span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">✨</div>
+            <div class="empty-title">No Recommendations Yet</div>
+            <p class="empty-text">Fill in the form above and click "Generate Recommendations" to see AI-powered insights</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function toggleMenu() {
+        const navbar = document.getElementById('navbar');
+        navbar.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>
+
+

@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🏆 Best Performing Files</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; background: #f8f9fa; }
+        h1 { color: #333; }
+        .container { max-width: 1200px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #007bff; color: #fff; }
+        select, input[type=number] { padding: 5px; margin: 5px; }
+        .metrics { display: flex; justify-content: space-between; margin-top: 20px; }
+        .metric-box { background: #e9ecef; padding: 15px; border-radius: 8px; text-align: center; width: 45%; }
+        .success { background: #d4edda; padding: 10px; border-radius: 5px; color: #155724; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+<div class="container">
+    <h1>🏆 Sponsor, Category & ISP Wise Best Performing Files</h1>
+
+    {% if error %}
+        <div style="color:red;">❌ {{ error }}</div>
+    {% endif %}
+
+    <form method="get">
+        <label>Sponsor:</label>
+        <select name="sponsor">
+            {% for s in filters.sponsors %}
+                <option value="{{ s }}" {% if filters.selected.sponsor == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Category:</label>
+        <select name="category">
+            {% for c in filters.categories %}
+                <option value="{{ c }}" {% if filters.selected.category == c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+        </select>
+
+        <label>ISP:</label>
+        <select name="isp">
+            {% for i in filters.isps %}
+                <option value="{{ i }}" {% if filters.selected.isp == i %}selected{% endif %}>{{ i }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Exclude Last X Days:</label>
+        <input type="number" name="exclude_days" value="{{ filters.selected.exclude_days }}" min="0" max="90">
+
+        <button type="submit">Filter</button>
+    </form>
+
+    {% if results %}
+        <h3>📊 Top Performing Files</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Matched Data File</th>
+                    <th>Revenue</th>
+                    <th>CPM</th>
+                    <th>EPC</th>
+                    <th>Clicks</th>
+                    <th>Sent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in results %}
+                <tr>
+                    <td>{{ row.matched_datafile }}</td>
+                    <td>{{ row.revenue|floatformat:2 }}</td>
+                    <td>{{ row.cpm|floatformat:2 }}</td>
+                    <td>{{ row.epc|floatformat:2 }}</td>
+                    <td>{{ row.clicks }}</td>
+                    <td>{{ row.sent }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if best_file %}
+        <div class="success">🏅 <strong>Best File:</strong> {{ best_file }}</div>
+        {% endif %}
+
+        <div class="metrics">
+            <div class="metric-box">
+                <h4>Records After Filtering</h4>
+                <p>{{ record_count }}</p>
+            </div>
+            <div class="metric-box">
+                <h4>Unique Data Files</h4>
+                <p>{{ unique_files }}</p>
+            </div>
+        </div>
+    {% else %}
+        <p>{{ message }}</p>
+    {% endif %}
+</div>
+</body>
+</html>

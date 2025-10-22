@@ -1,0 +1,799 @@
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>Unused Data Files</title>
+    <style>
+        body { font-family: Arial; margin: 20px; background: #f8f9fa; }
+        h1, h2 { color: #333; }
+        form { background: #fff; padding: 20px; border-radius: 8px; }
+        input, select, button { padding: 8px; margin: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #eee; }
+        .summary { background: #fff; padding: 10px; border-radius: 6px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    {% load static %}
+    {% include 'navbar.html' %}
+    <h1>📋 Unused Data Files Finder</h1>
+    {% if error %}
+        <p style="color:red;">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+        <label>Campaign ID:</label>
+        <input type="text" name="campaign_id" placeholder="Enter Campaign ID">
+
+        <label>ISP Name:</label>
+        <select name="isp_selected">
+            <option>All</option>
+            {% for isp in isp_options %}
+                <option value="{{ isp }}">{{ isp }}</option>
+            {% endfor %}
+        </select>
+
+        <label>File Series:</label>
+        <select name="file_series_selected">
+            <option>All</option>
+            {% for fs in file_series_options %}
+                <option value="{{ fs }}">{{ fs }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Days (not used in last N days):</label>
+        <input type="number" name="days_slider" value="15" min="15" max="90">
+
+        <button type="submit">Search</button>
+    </form>
+
+    {% if summary %}
+        {% if summary.error %}
+            <p style="color:red;">{{ summary.error }}</p>
+        {% else %}
+            <div class="summary">
+                <strong>🎯 Campaign ID:</strong> {{ summary.campaign_id }} <br>
+                <strong>Campaign Name:</strong> {{ summary.campaign_name }} <br>
+                <strong>Not used in last:</strong> {{ summary.days }} days <br>
+                <strong>Total Unused Files:</strong> {{ summary.count }}
+            </div>
+        {% endif %}
+    {% endif %}
+
+    {% if unused_datafiles %}
+        <h2>📄 Unused Data Files</h2>
+        <table>
+            <tr><th>Unused Data File</th></tr>
+            {% for file in unused_datafiles %}
+                <tr><td>{{ file }}</td></tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+
+    <hr>
+    <p>Made with ❤️ by eDirfectsys</p>
+</body>
+</html> -->
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Data Files - eDirectSys</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f8fafb;
+            color: #2d3748;
+            margin-left: 260px;
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: white;
+            padding: 20px 40px;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .top-bar-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #2d3748;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-toggle:hover {
+            color: #667eea;
+        }
+
+        .top-bar-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: #1a202c;
+            letter-spacing: -0.5px;
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 0 20px;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        .user-info-text {
+            text-align: right;
+        }
+
+        .user-greeting {
+            font-size: 0.9em;
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .user-name {
+            font-size: 0.95em;
+            color: #1a202c;
+            font-weight: 600;
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);
+        }
+
+        /* Page Content */
+        .page-content {
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #718096;
+            margin-bottom: 32px;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .breadcrumb a:hover {
+            color: #764ba2;
+        }
+
+        .breadcrumb span {
+            color: #cbd5e0;
+        }
+
+        /* Alert Messages */
+        .alert {
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            border: 1px solid #fc8181;
+            color: #c53030;
+        }
+
+        .alert-error i {
+            font-size: 1.2em;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 32px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .filter-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            background: #f8fafb;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        /* Summary Cards */
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .summary-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-color: #cbd5e0;
+        }
+
+        .summary-card h3 {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #718096;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card p {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #1a202c;
+            word-break: break-word;
+        }
+
+        /* Results Section */
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+        }
+
+        .results-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f7fafc;
+        }
+
+        .results-title {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 4px;
+        }
+
+        .results-count {
+            font-size: 0.85em;
+            color: #718096;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f7fafc;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        th {
+            padding: 16px 28px;
+            text-align: left;
+            font-size: 0.85em;
+            font-weight: 700;
+            color: #2d3748;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e2e8f0;
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: #f7fafc;
+        }
+
+        td {
+            padding: 16px 28px;
+            font-size: 0.9em;
+            color: #2d3748;
+            word-break: break-word;
+        }
+
+        /* Empty State */
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3em;
+            margin-bottom: 16px;
+            color: #cbd5e0;
+        }
+
+        .empty-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: #718096;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #a0aec0;
+            font-size: 0.9em;
+            margin-top: 40px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .page-content {
+                padding: 30px;
+            }
+
+            .filter-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .summary-section {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                margin-left: 0;
+            }
+
+            .menu-toggle {
+                display: block;
+            }
+
+            .page-content {
+                padding: 20px;
+            }
+
+            .user-info-text {
+                display: none;
+            }
+
+            .top-bar-right {
+                gap: 15px;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+
+            .summary-section {
+                grid-template-columns: 1fr;
+            }
+
+            th, td {
+                padding: 12px 16px;
+                font-size: 0.85em;
+            }
+
+            .top-bar {
+                padding: 16px 20px;
+            }
+
+            .filter-section {
+                padding: 20px;
+            }
+
+            .results-header {
+                padding: 16px 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-content {
+                padding: 16px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 12px;
+                align-items: flex-start;
+            }
+
+            .top-bar-right {
+                width: 100%;
+                justify-content: flex-end;
+            }
+
+            .filter-section {
+                padding: 16px;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+
+            .results-header {
+                padding: 16px;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.8em;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Scrollbar */
+        .page-content::-webkit-scrollbar,
+        .table-wrapper::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .page-content::-webkit-scrollbar-track,
+        .table-wrapper::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .page-content::-webkit-scrollbar-thumb,
+        .table-wrapper::-webkit-scrollbar-thumb {
+            background: #cbd5e0;
+            border-radius: 3px;
+        }
+
+        .page-content::-webkit-scrollbar-thumb:hover,
+        .table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #a0aec0;
+        }
+    </style>
+</head>
+<body>
+
+{% include 'navbar.html' %}
+
+<!-- Top Bar -->
+<div class="top-bar">
+    <div class="top-bar-left">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="top-bar-title">Best Data Files</h1>
+    </div>
+    <div class="top-bar-right">
+        <div class="user-section">
+            <div class="user-info-text">
+                <div class="user-greeting">Welcome back</div>
+                <div class="user-name">{{ user.username|default:"User Account" }}</div>
+            </div>
+            <div class="user-avatar">{{ user.username|first|upper|default:"U" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Page Content -->
+<div class="page-content">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+        <a href="{% url 'home' %}">Home</a>
+        <span>/</span>
+        <span>Best Data Files</span>
+    </div>
+
+    <!-- Error Alert -->
+    {% if error %}
+        <div class="alert alert-error">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>{{ error }}</div>
+        </div>
+    {% endif %}
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <div class="filter-title">
+            <i class="fas fa-filter"></i>
+            Find Best Performing Files
+        </div>
+
+        <form method="POST" id="filterForm">
+            {% csrf_token %}
+
+            <div class="filter-grid">
+                <div class="form-group">
+                    <label for="campaign_id">Campaign ID</label>
+                    <input type="text" id="campaign_id" name="campaign_id" placeholder="Enter campaign ID" />
+                </div>
+
+                <div class="form-group">
+                    <label for="isp_selected">ISP Name</label>
+                    <select id="isp_selected" name="isp_selected">
+                        <option value="">All ISPs</option>
+                        {% for isp in isp_options %}
+                            <option value="{{ isp }}">{{ isp }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="file_series_selected">File Series</label>
+                    <select id="file_series_selected" name="file_series_selected">
+                        <option value="">All File Series</option>
+                        {% for fs in file_series_options %}
+                            <option value="{{ fs }}">{{ fs }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="days_slider">Days Not Used (Last N Days)</label>
+                    <input type="number" id="days_slider" name="days_slider" value="15" min="15" max="90" />
+                </div>
+            </div>
+
+            <div class="filter-buttons">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i>
+                    Search Files
+                </button>
+                <button type="reset" class="btn btn-secondary">
+                    <i class="fas fa-redo"></i>
+                    Reset
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Summary Section -->
+    {% if summary and not summary.error %}
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3>Campaign ID</h3>
+                <p>{{ summary.campaign_id }}</p>
+            </div>
+            <div class="summary-card">
+                <h3>Campaign Name</h3>
+                <p>{{ summary.campaign_name }}</p>
+            </div>
+            <div class="summary-card">
+                <h3>Period</h3>
+                <p>{{ summary.days }} days</p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Files</h3>
+                <p>{{ summary.count }}</p>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Results Table -->
+    {% if unused_datafiles %}
+        <div class="results-section">
+            <div class="results-header">
+                <div class="results-title">Data Files</div>
+                <div class="results-count">{{ unused_datafiles|length }} files found</div>
+            </div>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-file"></i> Data File Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for file in unused_datafiles %}
+                            <tr>
+                                <td>{{ file }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    {% elif summary and not error %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-inbox"></i>
+            </div>
+            <div class="empty-title">No Files Found</div>
+            <p class="empty-text">Try adjusting your filter criteria</p>
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">
+                <i class="fas fa-star"></i>
+            </div>
+            <div class="empty-title">Ready to Discover</div>
+            <p class="empty-text">Fill in the form above to find your best performing data files</p>
+        </div>
+    {% endif %}
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>Made with <i class="fas fa-heart" style="color: #667eea;"></i> by eDirectSys</p>
+    </div>
+</div>
+
+<script>
+    function toggleMenu() {
+        const navbar = document.getElementById('navbar');
+        navbar?.classList.toggle('active');
+    }
+</script>
+
+</body>
+</html>

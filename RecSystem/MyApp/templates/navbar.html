@@ -1,0 +1,233 @@
+<!-- Navbar Styles -->
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: #f8fafb;
+        color: #2d3748;
+    }
+
+    /* ===== SIDEBAR NAVBAR ===== */
+    .navbar {
+        width: 260px;
+        background: linear-gradient(180deg, #1a202c 0%, #2d3748 100%);
+        padding: 0;
+        position: fixed;
+        left: 0;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        transition: width 0.3s ease;
+        z-index: 1000;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Logo Section */
+    .navbar-header {
+        padding: 32px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .logo-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        color: white;
+        font-size: 1.4em;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .logo-text .brand-name {
+        font-size: 1.1em;
+        font-weight: 700;
+        color: white;
+        letter-spacing: 0.5px;
+    }
+
+    .logo-text .brand-subtitle {
+        font-size: 0.7em;
+        color: rgba(255, 255, 255, 0.5);
+        font-weight: 500;
+    }
+
+    .nav-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        padding: 24px 0;
+    }
+
+    .nav-item {
+        margin: 0;
+        position: relative;
+    }
+
+    .nav-item a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.95em;
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: all 0.25s ease;
+        position: relative;
+        border-left: 3px solid transparent;
+    }
+
+    .nav-item a i {
+        width: 20px;
+        font-size: 1em;
+        opacity: 0.7;
+        transition: all 0.25s ease;
+    }
+
+    .nav-item a:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+        border-left-color: rgba(102, 126, 234, 0.6);
+        padding-left: 28px;
+    }
+
+    .nav-item a:hover i {
+        opacity: 1;
+    }
+
+    .nav-item a.active {
+        color: white;
+        background: rgba(102, 126, 234, 0.2);
+        border-left-color: #667eea;
+        padding-left: 28px;
+    }
+
+    .nav-item a.active i {
+        color: #667eea;
+        opacity: 1;
+    }
+
+    /* Logout item separator */
+    .nav-item:last-child {
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .navbar {
+            width: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .navbar.active {
+            width: 260px;
+        }
+    }
+
+    /* Scrollbar */
+    .navbar::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .navbar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .navbar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+
+    .navbar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+</style>
+
+<!-- Sidebar Navigation -->
+<nav class="navbar" id="navbar">
+    <div class="navbar-header">
+        <div class="logo-icon">eD</div>
+        <div class="logo-text">
+            <span class="brand-name">eDirectSys</span>
+            <span class="brand-subtitle">Pro</span>
+        </div>
+    </div>
+
+    <ul class="nav-list">
+        <li class="nav-item">
+            <a href="{% url 'home' %}">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'recommendations' %}">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                <span>AI Assistance</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'unuse_DS' %}">
+                <i class="fas fa-database"></i>
+                <span>Unused Files</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'best_files' %}">
+                <i class="fas fa-star"></i>
+                <span>Best Files</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<script>
+    function toggleMenu() {
+        const navbar = document.getElementById('navbar');
+        navbar.classList.toggle('active');
+    }
+
+    // Close menu when a link is clicked on mobile
+    document.querySelectorAll('.nav-item a').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                document.getElementById('navbar').classList.remove('active');
+            }
+        });
+    });
+
+    // Set active link based on current page
+    document.querySelectorAll('.nav-item a').forEach(link => {
+        if (link.href === window.location.href) {
+            link.classList.add('active');
+        }
+    });
+</script>
